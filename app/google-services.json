@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "54541466104",
+    "project_id": "confession-android-app",
+    "storage_bucket": "confession-android-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:54541466104:android:f07ea48cf1d486d28bbe0d",
+        "android_client_info": {
+          "package_name": "me.xianglun.confession_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "54541466104-tst38v69tsmv1r0nj1obia24n6um1f8k.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCDP0ZsHu2gFShaL6eJCIuwzWhT2jED0Uc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "54541466104-tst38v69tsmv1r0nj1obia24n6um1f8k.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
