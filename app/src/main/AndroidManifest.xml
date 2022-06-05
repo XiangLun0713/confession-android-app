@@ -1,17 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-        package="me.xianglun.confession_app">
+    package="me.xianglun.confession_app" >
 
     <application
-            android:allowBackup="true"
-            android:icon="@mipmap/ic_launcher"
-            android:label="@string/app_name"
-            android:roundIcon="@mipmap/ic_launcher_round"
-            android:supportsRtl="true"
-            android:theme="@style/Theme.Confessionapp">
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Confessionapp" >
         <activity
-                android:name=".LoginActivity"
-                android:exported="true">
+            android:name=".AdminMainActivity"
+            android:exported="false" />
+        <activity
+            android:name=".LoginActivity"
+            android:exported="true" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -19,8 +22,8 @@
             </intent-filter>
         </activity>
         <activity
-                android:name=".MainActivity"
-                android:exported="false" />
+            android:name=".MainActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

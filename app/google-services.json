@@ -1,6 +1,7 @@
-{
+ {
   "project_info": {
     "project_number": "54541466104",
+    "firebase_url": "https://confession-android-app-default-rtdb.asia-southeast1.firebasedatabase.app",
     "project_id": "confession-android-app",
     "storage_bucket": "confession-android-app.appspot.com"
   },
@@ -13,6 +14,14 @@
         }
       },
       "oauth_client": [
+        {
+          "client_id": "54541466104-echl2g0k2ce2ol63nf8p6903941mkmbu.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "me.xianglun.confession_app",
+            "certificate_hash": "2ac4f873f07fe21063597361254391a8155703fb"
+          }
+        },
         {
           "client_id": "54541466104-tst38v69tsmv1r0nj1obia24n6um1f8k.apps.googleusercontent.com",
           "client_type": 3
