@@ -1,5 +1,6 @@
 package me.xianglun.confession_app;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Html;
 import android.view.Menu;
@@ -29,8 +30,10 @@ public class MainActivity extends AppCompatActivity {
         mToolbar.setTitle(Html.fromHtml("<font color=\"#444444\"> Home </font>"));
         setSupportActionBar(mToolbar);
 
-        mFloatingActionButton.setOnClickListener(v -> Toast.makeText(this, "Create New Post", Toast.LENGTH_SHORT).show());
-
+        mFloatingActionButton.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, SubmitPostActivity.class);
+            startActivity(intent);
+        });
     }
 
     @Override
