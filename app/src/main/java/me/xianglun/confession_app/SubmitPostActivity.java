@@ -22,6 +22,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.LinearLayoutCompat;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
 
@@ -29,8 +30,11 @@ import com.github.dhaval2404.imagepicker.ImagePicker;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -44,6 +48,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
+import me.xianglun.confession_app.model.PostModel;
+
 public class SubmitPostActivity extends AppCompatActivity {
 
     // declare the reference variable
@@ -54,9 +60,11 @@ public class SubmitPostActivity extends AppCompatActivity {
     private LinearLayout linearLayout;
     private TextView replyPostIdText;
     private EditText contentText;
+    private LinearLayoutCompat linearLayoutCompat;
     private DatabaseReference databaseReference;
     private Intent intent;
     private List<String> imagePaths;
+    private long postCountInDatabase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,11 +78,27 @@ public class SubmitPostActivity extends AppCompatActivity {
         linearLayout = findViewById(R.id.new_post_linear_layout);
         replyPostIdText = findViewById(R.id.reply_post_id_text_view);
         contentText = findViewById(R.id.post_content_edit_text);
-        FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance("https://confession-android-app-default-rtdb.asia-southeast1.firebasedatabase.app/");
+        linearLayoutCompat = findViewById(R.id.reply_post_id_layout);
+        FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance("https://confession-android-app-default-rtdb.asia-southeast1.firebasedatabase.app");
         databaseReference = firebaseDatabase.getReference();
         imagePaths = new ArrayList<>();
         intent = getIntent();
         replyId = intent.getStringExtra("replyId");
+
+        // add listener to keep track of the post count in database
+        databaseReference.child("submitted_posts").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    postCountInDatabase = snapshot.getChildrenCount();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
 
         // set up the action bar
         mToolbar.setTitle("Create post");
@@ -94,10 +118,10 @@ public class SubmitPostActivity extends AppCompatActivity {
         // decide to show/hide the reply id textView
         if (replyId == null) {
             // hide it
-            linearLayout.removeView(replyPostIdText);
+            linearLayout.removeView(linearLayoutCompat);
         } else {
             // populate it with the reply id instead
-            replyPostIdText.setText(replyId);
+            replyPostIdText.setText("#".concat(replyId));
         }
     }
 
@@ -118,7 +142,7 @@ public class SubmitPostActivity extends AppCompatActivity {
                 mProgressIndicatorCardView.setVisibility(View.VISIBLE);
                 savePostToDatabase();
             } else {
-                Toast.makeText(this, "You cannot submit an empty post.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "You cannot submit a post without texts.", Toast.LENGTH_SHORT).show();
             }
             return true;
 
@@ -165,18 +189,38 @@ public class SubmitPostActivity extends AppCompatActivity {
             }
         }
 
+        // staging and pushing data
         Tasks.whenAllComplete(storeImageOnDatabaseTaskList).addOnCompleteListener(task -> Tasks.whenAllComplete(getUriTaskList).addOnCompleteListener(task12 -> {
+            // set up current post id in String format
+            String currPostId = String.format(Locale.US, "CFS%06d", postCountInDatabase);
+
             // get reference to database
-            DatabaseReference postNode = databaseReference.child("submitted_posts").push();
+            DatabaseReference postNode = databaseReference.child("submitted_posts").child(currPostId);
 
             // staging the data
             HashMap<String, Object> postMap = new HashMap<>();
-            postMap.put("id", postNode.getKey());
+            postMap.put("id", currPostId);
             postMap.put("replyId", replyId);
             postMap.put("date", date);
             postMap.put("time", time);
             postMap.put("content", content);
             postMap.put("imagePaths", imagePaths);
+
+            // record the current post id as the children of the original post
+            if (replyId != null) {
+                DatabaseReference repliedPostNode = databaseReference.child("submitted_posts").child(replyId);
+                repliedPostNode.get().addOnCompleteListener(dataSnapshotTask -> {
+                    PostModel repliedPost = dataSnapshotTask.getResult().getValue(PostModel.class);
+                    List<String> repliedBy = Objects.requireNonNull(repliedPost).getRepliedBy();
+                    if (repliedBy == null) {
+                        repliedBy = new ArrayList<>();
+                    }
+                    repliedBy.add(currPostId);
+                    HashMap<String, Object> hashMap = new HashMap<>();
+                    hashMap.put("repliedBy", repliedBy);
+                    repliedPostNode.updateChildren(hashMap);
+                });
+            }
 
             // push the staged data to the database
             postNode.updateChildren(postMap).addOnCompleteListener(voidTask -> {
@@ -194,8 +238,6 @@ public class SubmitPostActivity extends AppCompatActivity {
                 getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
             });
         }));
-
-
     }
 
     private void displayImagePickerDialog() {

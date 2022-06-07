@@ -2,9 +2,9 @@ package me.xianglun.confession_app.model;
 
 import java.util.List;
 
-public class Post {
+public class PostModel {
     private String date, time, content, id, replyId;
-    private List<String> imagePaths;
+    private List<String> imagePaths, repliedBy;
 
     public String getDate() {
         return date;
@@ -53,4 +53,14 @@ public class Post {
     public void setImagePaths(List<String> imagePaths) {
         this.imagePaths = imagePaths;
     }
+
+    public List<String> getRepliedBy() {
+        return repliedBy;
+    }
+
+    public void setRepliedBy(List<String> repliedBy) {
+        this.repliedBy = repliedBy;
+    }
+
+
 }
