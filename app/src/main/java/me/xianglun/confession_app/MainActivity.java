@@ -10,14 +10,28 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
+
+import me.xianglun.confession_app.adapter.PostAdapter;
+import me.xianglun.confession_app.model.PostModel;
 
 public class MainActivity extends AppCompatActivity {
 
     private Toolbar mToolbar;
     private FloatingActionButton mFloatingActionButton;
+    private RecyclerView mRecyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,6 +40,10 @@ public class MainActivity extends AppCompatActivity {
 
         mToolbar = findViewById(R.id.main_toolbar);
         mFloatingActionButton = findViewById(R.id.floating_action_button);
+        mRecyclerView = findViewById(R.id.post_recycler_view);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        loadPosts();
 
         mToolbar.setTitle(Html.fromHtml("<font color=\"#444444\"> Home </font>"));
         setSupportActionBar(mToolbar);
@@ -36,10 +54,42 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void loadPosts() {
+        ArrayList<PostModel> postList = new ArrayList<>();
+        PostAdapter postAdapter = new PostAdapter(this, postList);
+        mRecyclerView.setAdapter(postAdapter);
+        FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance("https://confession-android-app-default-rtdb.asia-southeast1.firebasedatabase.app");
+        DatabaseReference databaseReference = firebaseDatabase.getReference().child("submitted_posts");
+        databaseReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                postList.clear();
+                if (snapshot.exists()) {
+                    for (DataSnapshot snap : snapshot.getChildren()) {
+                        PostModel post = snap.getValue(PostModel.class);
+                        postList.add(0, post);
+                    }
+                }
+                postAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        // set up option menu
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main_menu, menu);
+
+        // provide functionality for the search menu item
+        // TODO: 6/6/2022 implement search feature
+        SearchView searchView = (SearchView) menu.findItem(R.id.app_bar_search).getActionView();
+        searchView.setQueryHint("Search Post...");
         return true;
     }
 
