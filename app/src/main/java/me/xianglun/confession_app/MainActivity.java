@@ -62,6 +62,17 @@ public class MainActivity extends AppCompatActivity {
         postAdapter = new PostAdapter(this, postList);
         mRecyclerView.setAdapter(postAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        postAdapter.setOnItemClickListener(position -> {
+            PostModel post = postList.get(position);
+            Intent intent = new Intent(MainActivity.this, SubmitPostActivity.class);
+            intent.putExtra("postId", post.getId());
+            intent.putExtra("replyId", post.getReplyId());
+            intent.putExtra("content", post.getContent());
+            intent.putExtra("date", post.getDate());
+            intent.putExtra("time", post.getTime());
+            intent.putStringArrayListExtra("imagePaths", (ArrayList<String>) post.getImagePaths());
+            startActivity(intent);
+        });
         FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance("https://confession-android-app-default-rtdb.asia-southeast1.firebasedatabase.app");
         DatabaseReference databaseReference = firebaseDatabase.getReference().child("submitted_posts");
         databaseReference.addValueEventListener(new ValueEventListener() {
@@ -118,6 +129,17 @@ public class MainActivity extends AppCompatActivity {
         }
         PostAdapter postAdapter = new PostAdapter(this, filteredList);
         mRecyclerView.setAdapter(postAdapter);
+        postAdapter.setOnItemClickListener(position -> {
+            PostModel post = filteredList.get(position);
+            Intent intent = new Intent(MainActivity.this, SubmitPostActivity.class);
+            intent.putExtra("postId", post.getId());
+            intent.putExtra("replyId", post.getReplyId());
+            intent.putExtra("content", post.getContent());
+            intent.putExtra("date", post.getDate());
+            intent.putExtra("time", post.getTime());
+            intent.putStringArrayListExtra("imagePaths", (ArrayList<String>) post.getImagePaths());
+            startActivity(intent);
+        });
     }
 
     @Override

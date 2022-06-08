@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.Html;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -26,6 +27,7 @@ import androidx.appcompat.widget.LinearLayoutCompat;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
 
+import com.bumptech.glide.Glide;
 import com.github.dhaval2404.imagepicker.ImagePicker;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
@@ -53,7 +55,7 @@ import me.xianglun.confession_app.model.PostModel;
 public class SubmitPostActivity extends AppCompatActivity {
 
     // declare the reference variable
-    private String date, time, replyId;
+    private String date, time, replyId, postId;
     private Toolbar mToolbar;
     private CardView mProgressIndicatorCardView;
     private TextView dateAndTimeLabel;
@@ -100,20 +102,54 @@ public class SubmitPostActivity extends AppCompatActivity {
             }
         });
 
-        // set up the action bar
-        mToolbar.setTitle("Create post");
-        setSupportActionBar(mToolbar);
-        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+        postId = intent.getStringExtra("postId");
+        if (postId != null) {
+            // if viewing post,
+            // set appropriate action bar title
+            mToolbar.setTitle(Html.fromHtml("<font color=\"#444444\"> Viewing post </font>"));
 
-        // set up date and time
-        Date c = Calendar.getInstance().getTime();
-        SimpleDateFormat df = new SimpleDateFormat("E, dd-MMM-yyyy   hh:mm a", Locale.getDefault());
-        String formattedDate = df.format(c);
-        dateAndTimeLabel.setText(formattedDate);
-        df = new SimpleDateFormat("E, dd-MMM-yyyy", Locale.getDefault());
-        date = df.format(c);
-        df = new SimpleDateFormat("hh:mm a", Locale.getDefault());
-        time = df.format(c);
+            // set up date, time and content according to the post's info
+            dateAndTimeLabel.setText(intent.getStringExtra("date").concat("   ").concat(intent.getStringExtra("time")));
+            contentText.setText(intent.getStringExtra("content"));
+            contentText.setFocusable(false);
+
+            // get back image paths from
+            if (intent.getStringArrayListExtra("imagePaths") != null)
+                imagePaths = intent.getStringArrayListExtra("imagePaths");
+
+            // generate previous images
+            if (imagePaths != null) {
+                for (int i = 0; i < imagePaths.size(); i++) {
+                    LinearLayout.LayoutParams linearParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                    linearParams.setMargins(convertDpToPx(getApplicationContext(), 10), convertDpToPx(getApplicationContext(), 5), convertDpToPx(getApplicationContext(), 10), convertDpToPx(getApplicationContext(), 5));
+
+                    View template = getLayoutInflater().inflate(R.layout.template_post_image, linearLayout, false);
+                    ImageView image = template.findViewById(R.id.post_image);
+                    Glide.with(this).load(imagePaths.get(i)).into(image);
+                    FloatingActionButton deleteBtn = template.findViewById(R.id.delete_image_button);
+                    deleteBtn.setClickable(false);
+                    deleteBtn.setVisibility(View.INVISIBLE);
+
+                    linearLayout.addView(template, linearParams);
+                }
+            }
+
+        } else {
+            // if creating post,
+            // set appropriate action bar title
+            mToolbar.setTitle(Html.fromHtml("<font color=\"#444444\"> Creating post </font>"));
+
+            // set up date and time according to current time
+            Date c = Calendar.getInstance().getTime();
+            SimpleDateFormat df = new SimpleDateFormat("E, dd-MMM-yyyy   hh:mm a", Locale.getDefault());
+            String formattedDate = df.format(c);
+            dateAndTimeLabel.setText(formattedDate);
+            df = new SimpleDateFormat("E, dd-MMM-yyyy", Locale.getDefault());
+            date = df.format(c);
+            df = new SimpleDateFormat("hh:mm a", Locale.getDefault());
+            time = df.format(c);
+
+        }
 
         // decide to show/hide the reply id textView
         if (replyId == null) {
@@ -123,12 +159,26 @@ public class SubmitPostActivity extends AppCompatActivity {
             // populate it with the reply id instead
             replyPostIdText.setText("#".concat(replyId));
         }
+
+        // setting up action bar
+        setSupportActionBar(mToolbar);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.create_post_menu, menu);
+        // if creating post inflate and show the menu
+        if (postId == null) {
+            MenuInflater inflater = getMenuInflater();
+            inflater.inflate(R.menu.create_post_menu, menu);
+        }
+        return true;
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
         return true;
     }
 
@@ -250,7 +300,7 @@ public class SubmitPostActivity extends AppCompatActivity {
         if (resultCode == Activity.RESULT_OK) {
             if (data != null) {
                 Uri uri = data.getData();
-                addDiaryImageTemplate(uri);
+                addPostImageTemplate(uri);
             }
         } else if (resultCode == ImagePicker.RESULT_ERROR) {
             Toast.makeText(this, ImagePicker.getError(data), Toast.LENGTH_SHORT).show();
@@ -259,7 +309,7 @@ public class SubmitPostActivity extends AppCompatActivity {
         }
     }
 
-    private void addDiaryImageTemplate(Uri data) {
+    private void addPostImageTemplate(Uri data) {
         LinearLayout.LayoutParams linearParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         linearParams.setMargins(convertDpToPx(getApplicationContext(), 10), convertDpToPx(getApplicationContext(), 5), convertDpToPx(getApplicationContext(), 10), convertDpToPx(getApplicationContext(), 5));
 
