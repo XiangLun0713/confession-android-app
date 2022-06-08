@@ -2,19 +2,23 @@ package me.xianglun.confession_app.adapter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -23,11 +27,21 @@ import java.util.ArrayList;
 import me.xianglun.confession_app.R;
 import me.xianglun.confession_app.SubmitPostActivity;
 import me.xianglun.confession_app.model.PostModel;
+import pereira.agnaldo.previewimgcol.ImageCollectionView;
 
 public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder> {
 
     private final Context context;
     private final ArrayList<PostModel> postList;
+    private OnItemClickListener mListener;
+
+    public interface OnItemClickListener {
+        void onItemClick(int position);
+    }
+
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        mListener = listener;
+    }
 
     public PostAdapter(Context context, ArrayList<PostModel> postList) {
         this.context = context;
@@ -40,7 +54,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         // inflate the view holder
         LayoutInflater layoutInflater = LayoutInflater.from(context);
         View view = layoutInflater.inflate(R.layout.template_post, parent, false);
-        return new PostViewHolder(view);
+        return new PostViewHolder(view, mListener);
     }
 
     @Override
@@ -72,12 +86,26 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
             popupMenu.show();
         });
         if (post.getImagePaths() != null && post.getImagePaths().size() > 0) {
-            if (!post.getImagePaths().get(0).isEmpty()) {
-                // display the first image at the post
-                // TODO: 6/7/2022 try to display all images (expandable)/show images count & let user view post on click
-                holder.imageView.setVisibility(View.VISIBLE);
-                Glide.with(context).load(post.getImagePaths().get(0)).into(holder.imageView);
+            for (String path : post.getImagePaths()) {
+                if (!path.isEmpty()) {
+                    // add image to the image view collection
+                    Glide.with(context)
+                            .asBitmap()
+                            .load(path)
+                            .into(new CustomTarget<Bitmap>() {
+                                @Override
+                                public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                                    holder.imageView.addImage(resource);
+                                }
+
+                                @Override
+                                public void onLoadCleared(@Nullable Drawable placeholder) {
+
+                                }
+                            });
+                }
             }
+            holder.imageView.setVisibility(View.VISIBLE);
         }
 
         if (post.getReplyId() == null) {
@@ -105,9 +133,9 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         private final TextView replyId;
         private final TextView content;
         private final ImageButton imageMenuButton;
-        private final ImageView imageView;
+        private final ImageCollectionView imageView;
 
-        public PostViewHolder(@NonNull View itemView) {
+        public PostViewHolder(@NonNull View itemView, OnItemClickListener listener) {
             super(itemView);
             date = itemView.findViewById(R.id.adapter_post_date);
             time = itemView.findViewById(R.id.adapter_post_time);
@@ -117,6 +145,15 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
             content = itemView.findViewById(R.id.adapter_post_text);
             imageMenuButton = itemView.findViewById(R.id.adapter_post_menu_button);
             imageView = itemView.findViewById(R.id.adapter_post_image);
+
+            itemView.setOnClickListener(v -> {
+                if (listener != null) {
+                    int position = getAdapterPosition();
+                    if (position != RecyclerView.NO_POSITION) {
+                        listener.onItemClick(position);
+                    }
+                }
+            });
         }
     }
 }
