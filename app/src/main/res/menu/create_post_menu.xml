@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+            android:id="@+id/add_photo_menu_item"
+            android:title="@string/add_a_photo"
+            android:icon="@drawable/ic_add_photo_icon_24"
+            app:showAsAction="ifRoom"/>
+
+    <item
+            android:id="@+id/submit_post_menu_item"
+            android:title="@string/submit_post"
+            android:icon="@drawable/ic_send_icon_24"
+            app:showAsAction="ifRoom"/>
+
+</menu>

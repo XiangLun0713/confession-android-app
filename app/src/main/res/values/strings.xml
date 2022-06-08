@@ -21,4 +21,10 @@
     <string name="reply">Reply</string>
     <string name="settings">Settings</string>
     <string name="report">Report</string>
+    <string name="submit_post">Submit post</string>
+    <string name="title">Title</string>
+    <string name="add_a_photo">Add a photo</string>
+    <string name="delete_image_button">Delete image button</string>
+    <string name="what_s_on_your_mind">What\'s on your mind?</string>
+    <string name="replying_to">Replying to</string>
 </resources>
