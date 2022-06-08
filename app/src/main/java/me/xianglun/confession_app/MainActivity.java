@@ -6,6 +6,7 @@ import android.text.Html;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -32,6 +33,8 @@ public class MainActivity extends AppCompatActivity {
     private Toolbar mToolbar;
     private FloatingActionButton mFloatingActionButton;
     private RecyclerView mRecyclerView;
+    private PostAdapter postAdapter;
+    private ArrayList<PostModel> postList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
         mToolbar = findViewById(R.id.main_toolbar);
         mFloatingActionButton = findViewById(R.id.floating_action_button);
         mRecyclerView = findViewById(R.id.post_recycler_view);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+
 
         loadPosts();
 
@@ -55,9 +58,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadPosts() {
-        ArrayList<PostModel> postList = new ArrayList<>();
-        PostAdapter postAdapter = new PostAdapter(this, postList);
+        postList = new ArrayList<>();
+        postAdapter = new PostAdapter(this, postList);
         mRecyclerView.setAdapter(postAdapter);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance("https://confession-android-app-default-rtdb.asia-southeast1.firebasedatabase.app");
         DatabaseReference databaseReference = firebaseDatabase.getReference().child("submitted_posts");
         databaseReference.addValueEventListener(new ValueEventListener() {
@@ -87,10 +91,33 @@ public class MainActivity extends AppCompatActivity {
         inflater.inflate(R.menu.main_menu, menu);
 
         // provide functionality for the search menu item
-        // TODO: 6/6/2022 implement search feature
         SearchView searchView = (SearchView) menu.findItem(R.id.app_bar_search).getActionView();
         searchView.setQueryHint("Search Post...");
+        searchView.setImeOptions(EditorInfo.IME_ACTION_DONE);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                search(newText);
+                return false;
+            }
+        });
         return true;
+    }
+
+    private void search(String str) {
+        ArrayList<PostModel> filteredList = new ArrayList<>();
+        for (PostModel post : postList) {
+            if ("#".concat(post.getId()).toLowerCase().contains(str.toLowerCase().trim())) {
+                filteredList.add(post);
+            }
+        }
+        PostAdapter postAdapter = new PostAdapter(this, filteredList);
+        mRecyclerView.setAdapter(postAdapter);
     }
 
     @Override
