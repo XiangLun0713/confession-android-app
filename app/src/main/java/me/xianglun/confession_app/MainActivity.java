@@ -45,7 +45,6 @@ public class MainActivity extends AppCompatActivity {
         mFloatingActionButton = findViewById(R.id.floating_action_button);
         mRecyclerView = findViewById(R.id.post_recycler_view);
 
-
         loadPosts();
 
         mToolbar.setTitle(Html.fromHtml("<font color=\"#444444\"> Home </font>"));
