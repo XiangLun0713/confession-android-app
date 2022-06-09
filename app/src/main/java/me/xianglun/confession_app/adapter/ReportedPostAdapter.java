@@ -18,9 +18,14 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 import me.xianglun.confession_app.R;
 import me.xianglun.confession_app.model.PostModel;
@@ -34,6 +39,7 @@ public class ReportedPostAdapter extends RecyclerView.Adapter<ReportedPostAdapte
 
     public interface OnItemClickListener {
         void onItemClick(int position);
+
     }
 
     public void setOnItemClickListener(OnItemClickListener listener) {
@@ -66,8 +72,8 @@ public class ReportedPostAdapter extends RecyclerView.Adapter<ReportedPostAdapte
             // ask for delete post confirmation
             AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AlertDialogTheme);
             builder.setTitle("Delete Post");
-            builder.setMessage("Are you sure you want to delete this post?");
-            builder.setPositiveButton("Delete", (dialog, id) -> batchRemoval(post.getId(), post.getRepliedBy()));
+            builder.setMessage("Are you sure you want to delete this post? All of its replying post will also be deleted.");
+            builder.setPositiveButton("Delete", (dialog, id) -> batchRemoval(post.getId(), post.getReplyId()));
             builder.setNegativeButton(android.R.string.cancel, (dialog, id) -> {
             });
             builder.show();
@@ -110,11 +116,47 @@ public class ReportedPostAdapter extends RecyclerView.Adapter<ReportedPostAdapte
     }
 
     /**
-     * Batch removing the targeted post and it's children
+     * Batch removing the targeted post and its children using DFS
      */
-    private void batchRemoval(String id, List<String> repliedBy) {
-        // TODO: 6/9/2022 implement post batch removal
-        Toast.makeText(context, "delete post with id " + id, Toast.LENGTH_SHORT).show();
+    private void batchRemoval(String id, String replyId) {
+        // access database reference
+        FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance("https://confession-android-app-default-rtdb.asia-southeast1.firebasedatabase.app");
+        DatabaseReference postNode = firebaseDatabase.getReference().child("submitted_posts");
+        DatabaseReference reportedPostNode = firebaseDatabase.getReference().child("reported_posts");
+        // perform deletion using dfs to delete itself and all of its children
+        dfsDelete(id, postNode, reportedPostNode);
+        // remove its presence in its parent repliedBy list
+        if (replyId != null) {
+            postNode.child(replyId).get().addOnCompleteListener(task -> {
+                DataSnapshot snapshot = task.getResult();
+                if (snapshot.exists()) {
+                    PostModel postModel = snapshot.getValue(PostModel.class);
+                    List<String> newRepliedByList = Objects.requireNonNull(postModel).getRepliedBy();
+                    newRepliedByList.remove(id);
+                    HashMap<String, Object> hashMap = new HashMap<>();
+                    hashMap.put("repliedBy", newRepliedByList);
+                    postNode.child(replyId).updateChildren(hashMap);
+                }
+            });
+        }
+        Toast.makeText(context, "Batch remove successfully!", Toast.LENGTH_SHORT).show();
+    }
+
+    private void dfsDelete(String id, DatabaseReference postNode, DatabaseReference reportedPostNode) {
+        postNode.child(id).get().addOnCompleteListener(task -> {
+            DataSnapshot snapshot = task.getResult();
+            if (snapshot.exists()) {
+                PostModel currPost = snapshot.getValue(PostModel.class);
+                List<String> repliedByList = Objects.requireNonNull(currPost).getRepliedBy();
+                postNode.child(currPost.getId()).removeValue();
+                reportedPostNode.child(currPost.getId()).removeValue();
+                if (repliedByList != null) {
+                    for (String replyingId : repliedByList) {
+                        dfsDelete(replyingId, postNode, reportedPostNode);
+                    }
+                }
+            }
+        });
     }
 
     @Override
