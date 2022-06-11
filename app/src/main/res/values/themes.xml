@@ -17,4 +17,13 @@
     <style name="AlertDialogTheme" parent="ThemeOverlay.MaterialComponents.Dialog.Alert">
         <item name="colorPrimary">@color/mid_red</item>
     </style>
+
+    <style name="Theme.Confessionapp.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="Theme.Confessionapp.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="Theme.Confessionapp.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 </resources>
