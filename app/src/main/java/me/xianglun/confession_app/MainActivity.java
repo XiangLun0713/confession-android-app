@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
         mFloatingActionButton = findViewById(R.id.floating_action_button);
         mRecyclerView = findViewById(R.id.post_recycler_view);
 
-        loadPosts();
+        loadAllPosts();
 
         mToolbar.setTitle(Html.fromHtml("<font color=\"#444444\"> Home </font>"));
         setSupportActionBar(mToolbar);
@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void loadPosts() {
+    private void loadAllPosts() {
         postList = new ArrayList<>();
         postAdapter = new PostAdapter(this, postList);
         mRecyclerView.setAdapter(postAdapter);
@@ -70,6 +70,7 @@ public class MainActivity extends AppCompatActivity {
             intent.putExtra("date", post.getDate());
             intent.putExtra("time", post.getTime());
             intent.putStringArrayListExtra("imagePaths", (ArrayList<String>) post.getImagePaths());
+            intent.putStringArrayListExtra("repliedBy", (ArrayList<String>) post.getRepliedBy());
             startActivity(intent);
         });
         FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance("https://confession-android-app-default-rtdb.asia-southeast1.firebasedatabase.app");
@@ -122,7 +123,9 @@ public class MainActivity extends AppCompatActivity {
     private void search(String str) {
         ArrayList<PostModel> filteredList = new ArrayList<>();
         for (PostModel post : postList) {
-            if ("#".concat(post.getId()).toLowerCase().contains(str.toLowerCase().trim())) {
+            String input = str.toLowerCase().trim();
+            if ("#".concat(post.getId()).toLowerCase().contains(input) || post.getContent().toLowerCase().contains(input)
+                    || post.getTime().toLowerCase().contains(input) || post.getDate().toLowerCase().contains(input)) {
                 filteredList.add(post);
             }
         }
@@ -137,6 +140,7 @@ public class MainActivity extends AppCompatActivity {
             intent.putExtra("date", post.getDate());
             intent.putExtra("time", post.getTime());
             intent.putStringArrayListExtra("imagePaths", (ArrayList<String>) post.getImagePaths());
+            intent.putStringArrayListExtra("repliedBy", (ArrayList<String>) post.getRepliedBy());
             startActivity(intent);
         });
     }

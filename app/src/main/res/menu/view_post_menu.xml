@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+            android:id="@+id/view_reply_to_post"
+            android:title="@string/view_reply_to_post"
+            app:showAsAction="never" />
+
+    <item
+            android:id="@+id/view_replying_post"
+            android:title="@string/view_replying_post"
+            app:showAsAction="never" />
+</menu>

@@ -7,6 +7,7 @@ import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -118,9 +119,13 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         if (post.getReplyId() == null) {
             // if this post doesn't reply to any other post, hide the corresponding text view
             TextView replyToText = holder.replyToText;
-            ((ViewGroup) replyToText.getParent()).removeView(replyToText);
-            TextView replyId = holder.replyId;
-            ((ViewGroup) replyId.getParent()).removeView(replyId);
+            ViewParent viewParent = replyToText.getParent();
+            if (viewParent instanceof ViewGroup) {
+                ViewGroup viewGroup = (ViewGroup) viewParent;
+                viewGroup.removeView(replyToText);
+                TextView replyId = holder.replyId;
+                viewGroup.removeView(replyId);
+            }
         } else {
             // otherwise, show the corresponding reply id
             holder.replyId.setText("#".concat(post.getReplyId()));

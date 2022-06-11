@@ -26,5 +26,6 @@
     <string name="add_a_photo">Add a photo</string>
     <string name="delete_image_button">Delete image button</string>
     <string name="what_s_on_your_mind">What\'s on your mind?</string>
-    <string name="replying_to">Replying to</string>
+    <string name="view_reply_to_post">View reply-to post</string>
+    <string name="view_replying_post">View replying post</string>
 </resources>
