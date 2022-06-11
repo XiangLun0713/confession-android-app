@@ -2,11 +2,23 @@ package me.xianglun.confession_app;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Patterns;
+import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
+import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.button.MaterialButton;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -14,6 +26,11 @@ public class LoginActivity extends AppCompatActivity {
     private EditText mEmailEditText;
     private EditText mPasswordEditText;
     private MaterialButton mLoginButton;
+    private MaterialButton mRegisterButton;
+    private TextView register;
+
+    private FirebaseAuth mAuth;
+    private ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,30 +42,77 @@ public class LoginActivity extends AppCompatActivity {
         mEmailEditText = findViewById(R.id.login_email_edit_text);
         mPasswordEditText = findViewById(R.id.login_password_edit_text);
         mLoginButton = findViewById(R.id.login_button);
+        mRegisterButton = findViewById(R.id.register_button);
+
+        mAuth = FirebaseAuth.getInstance();
+        progressBar = findViewById(R.id.progressBar);
+
+        //check if user has created an account before
+        if(mAuth.getCurrentUser() != null){
+            startActivity(new Intent(getApplicationContext(), MainActivity.class));
+            finish();
+        }
+
+        //redirect when user press register button
+        mRegisterButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(LoginActivity.this, SignUpActivity.class);
+                startActivity(intent);
+            }
+        });
 
         // Set on click listener on the login button
-        mLoginButton.setOnClickListener(v -> {
-            // Get the inputs from the edit texts
-            String emailInput = mEmailEditText.getText().toString();
-            String passwordInput = mPasswordEditText.getText().toString();
+        mLoginButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
 
-            // TODO: 6/4/2022 Jiajun, use these inputs entered by the user
-            //  to log the user into their account, please proceed...
+                String email = mEmailEditText.getText().toString().trim();
+                String password = mPasswordEditText.getText().toString().trim();
 
-            // TODO: 6/5/2022 Jiajun, the following logic is to allow us to navigate to both
-            //  admin or user page at this moment, as the authentication is not yet done.
-            //  Please change the below logic to let the user enter the admin page
-            //  only when the admin credentials was entered.
-            //  can set admin credentials as, email: admin@gmail.com; password: admin
-            Intent intent;
-            if (emailInput.equals("admin")) {
-                // Navigate from login activity to admin main activity
-                intent = new Intent(LoginActivity.this, AdminMainActivity.class);
-            } else {
-                // Navigate from login activity to main activity
-                intent = new Intent(LoginActivity.this, MainActivity.class);
+                if (email.isEmpty()) {
+                    mEmailEditText.setError("Email is required!");
+                    mEmailEditText.requestFocus();
+                    return;
+                }
+
+                if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                    mEmailEditText.setError("Please enter a valid email!");
+                    mEmailEditText.requestFocus();
+                    return;
+                }
+
+                if (password.isEmpty()) {
+                    mPasswordEditText.setError("Password is required!");
+                    mPasswordEditText.requestFocus();
+                    return;
+                }
+
+                if (password.length() < 6) {
+                    mPasswordEditText.setError("Min password length is 6 characters!");
+                    mPasswordEditText.requestFocus();
+                    return;
+                }
+
+                progressBar.setVisibility(View.VISIBLE);
+
+
+                mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
+                            Toast.makeText(LoginActivity.this, "Logged in Successfully ", Toast.LENGTH_SHORT).show();
+                            startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                        } else {
+                            Toast.makeText(LoginActivity.this, "Error! User not found! ", Toast.LENGTH_SHORT).show();
+
+                        }
+                    }
+                });
             }
-            startActivity(intent);
+
+
         });
+
     }
 }
