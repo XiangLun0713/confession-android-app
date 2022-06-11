@@ -6,6 +6,7 @@ import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -21,6 +22,7 @@ import com.bumptech.glide.request.transition.Transition;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -106,9 +108,13 @@ public class ReportedPostAdapter extends RecyclerView.Adapter<ReportedPostAdapte
         if (post.getReplyId() == null) {
             // if this post doesn't reply to any other post, hide the corresponding text view
             TextView replyToText = holder.replyToText;
-            ((ViewGroup) replyToText.getParent()).removeView(replyToText);
-            TextView replyId = holder.replyId;
-            ((ViewGroup) replyId.getParent()).removeView(replyId);
+            ViewParent viewParent = replyToText.getParent();
+            if (viewParent instanceof ViewGroup) {
+                ViewGroup viewGroup = (ViewGroup) viewParent;
+                viewGroup.removeView(replyToText);
+                TextView replyId = holder.replyId;
+                viewGroup.removeView(replyId);
+            }
         } else {
             // otherwise, show the corresponding reply id
             holder.replyId.setText("#".concat(post.getReplyId()));
@@ -119,12 +125,13 @@ public class ReportedPostAdapter extends RecyclerView.Adapter<ReportedPostAdapte
      * Batch removing the targeted post and its children using DFS
      */
     private void batchRemoval(String id, String replyId) {
-        // access database reference
+        // access database & storage reference
         FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance("https://confession-android-app-default-rtdb.asia-southeast1.firebasedatabase.app");
         DatabaseReference postNode = firebaseDatabase.getReference().child("submitted_posts");
         DatabaseReference reportedPostNode = firebaseDatabase.getReference().child("reported_posts");
+        FirebaseStorage firebaseStorage = FirebaseStorage.getInstance();
         // perform deletion using dfs to delete itself and all of its children
-        dfsDelete(id, postNode, reportedPostNode);
+        dfsDelete(id, postNode, reportedPostNode, firebaseStorage);
         // remove its presence in its parent repliedBy list
         if (replyId != null) {
             postNode.child(replyId).get().addOnCompleteListener(task -> {
@@ -142,17 +149,27 @@ public class ReportedPostAdapter extends RecyclerView.Adapter<ReportedPostAdapte
         Toast.makeText(context, "Batch remove successfully!", Toast.LENGTH_SHORT).show();
     }
 
-    private void dfsDelete(String id, DatabaseReference postNode, DatabaseReference reportedPostNode) {
+    private void dfsDelete(String id, DatabaseReference postNode, DatabaseReference reportedPostNode, FirebaseStorage firebaseStorage) {
         postNode.child(id).get().addOnCompleteListener(task -> {
             DataSnapshot snapshot = task.getResult();
             if (snapshot.exists()) {
                 PostModel currPost = snapshot.getValue(PostModel.class);
-                List<String> repliedByList = Objects.requireNonNull(currPost).getRepliedBy();
-                postNode.child(currPost.getId()).removeValue();
+                // delete current post from post collection
+                postNode.child(Objects.requireNonNull(currPost).getId()).removeValue();
+                // delete current post from reported post collection
                 reportedPostNode.child(currPost.getId()).removeValue();
+                // remove all current post's images from firebase storage
+                List<String> imagePaths = Objects.requireNonNull(currPost).getImagePaths();
+                if (imagePaths != null) {
+                    for (String path : imagePaths) {
+                        firebaseStorage.getReferenceFromUrl(path).delete();
+                    }
+                }
+                // get access to current post's children list and call dfsDelete on each child posts
+                List<String> repliedByList = Objects.requireNonNull(currPost).getRepliedBy();
                 if (repliedByList != null) {
                     for (String replyingId : repliedByList) {
-                        dfsDelete(replyingId, postNode, reportedPostNode);
+                        dfsDelete(replyingId, postNode, reportedPostNode, firebaseStorage);
                     }
                 }
             }

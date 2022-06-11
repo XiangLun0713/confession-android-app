@@ -1,4 +1,4 @@
-package me.xianglun.confession_app;
+package me.xianglun.confession_app.model;
 
 public class User {
 

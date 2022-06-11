@@ -47,6 +47,19 @@
                     android:padding="10dp"
                     android:textStyle="bold" />
 
+            <TextView
+                    android:id="@+id/post_id_text_view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@android:color/transparent"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="0dp"
+                    android:textColor="@color/dark_blue"
+                    android:paddingTop="0dp"
+                    android:paddingBottom="8dp" />
+
             <androidx.appcompat.widget.LinearLayoutCompat
                     android:id="@+id/reply_post_id_layout"
                     android:layout_width="match_parent"
@@ -57,9 +70,9 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:background="@android:color/transparent"
-                        android:textSize="20sp"
+                        android:textSize="18sp"
                         android:textStyle="bold"
-                        android:text="@string/replying_to"
+                        android:text="@string/reply_to"
                         android:textColor="@color/grey"
                         android:paddingStart="10dp"
                         android:paddingEnd="5dp"
@@ -70,7 +83,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:background="@android:color/transparent"
-                        android:textSize="20sp"
+                        android:textSize="18sp"
                         android:textStyle="bold"
                         android:textColor="@color/dark_blue"
                         android:paddingVertical="5dp" />

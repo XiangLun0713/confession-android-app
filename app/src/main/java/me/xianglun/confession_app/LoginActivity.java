@@ -30,7 +30,6 @@ public class LoginActivity extends AppCompatActivity {
     private TextView register;
 
     private FirebaseAuth mAuth;
-    private ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,7 +44,6 @@ public class LoginActivity extends AppCompatActivity {
         mRegisterButton = findViewById(R.id.register_button);
 
         mAuth = FirebaseAuth.getInstance();
-        progressBar = findViewById(R.id.progressBar);
 
         //check if user has created an account before
         if(mAuth.getCurrentUser() != null){
@@ -54,65 +52,50 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         //redirect when user press register button
-        mRegisterButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(LoginActivity.this, SignUpActivity.class);
-                startActivity(intent);
-            }
+        mRegisterButton.setOnClickListener(v -> {
+            Intent intent = new Intent(LoginActivity.this, SignUpActivity.class);
+            startActivity(intent);
         });
 
         // Set on click listener on the login button
-        mLoginButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        mLoginButton.setOnClickListener(v -> {
 
-                String email = mEmailEditText.getText().toString().trim();
-                String password = mPasswordEditText.getText().toString().trim();
+            String email = mEmailEditText.getText().toString().trim();
+            String password = mPasswordEditText.getText().toString().trim();
 
-                if (email.isEmpty()) {
-                    mEmailEditText.setError("Email is required!");
-                    mEmailEditText.requestFocus();
-                    return;
-                }
-
-                if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                    mEmailEditText.setError("Please enter a valid email!");
-                    mEmailEditText.requestFocus();
-                    return;
-                }
-
-                if (password.isEmpty()) {
-                    mPasswordEditText.setError("Password is required!");
-                    mPasswordEditText.requestFocus();
-                    return;
-                }
-
-                if (password.length() < 6) {
-                    mPasswordEditText.setError("Min password length is 6 characters!");
-                    mPasswordEditText.requestFocus();
-                    return;
-                }
-
-                progressBar.setVisibility(View.VISIBLE);
-
-
-                mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            Toast.makeText(LoginActivity.this, "Logged in Successfully ", Toast.LENGTH_SHORT).show();
-                            startActivity(new Intent(getApplicationContext(), MainActivity.class));
-                        } else {
-                            Toast.makeText(LoginActivity.this, "Error! User not found! ", Toast.LENGTH_SHORT).show();
-
-                        }
-                    }
-                });
+            if (email.isEmpty()) {
+                mEmailEditText.setError("Email is required!");
+                mEmailEditText.requestFocus();
+                return;
             }
 
+            if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                mEmailEditText.setError("Please enter a valid email!");
+                mEmailEditText.requestFocus();
+                return;
+            }
 
+            if (password.isEmpty()) {
+                mPasswordEditText.setError("Password is required!");
+                mPasswordEditText.requestFocus();
+                return;
+            }
+
+            if (password.length() < 6) {
+                mPasswordEditText.setError("Min password length is 6 characters!");
+                mPasswordEditText.requestFocus();
+                return;
+            }
+
+            mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    Toast.makeText(LoginActivity.this, "Logged in Successfully ", Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                } else {
+                    Toast.makeText(LoginActivity.this, "Error! User not found! ", Toast.LENGTH_SHORT).show();
+
+                }
+            });
         });
-
     }
 }
