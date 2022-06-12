@@ -28,4 +28,9 @@
     <string name="what_s_on_your_mind">What\'s on your mind?</string>
     <string name="view_reply_to_post">View reply-to post</string>
     <string name="view_replying_post">View replying post</string>
+    <string name="confess_ba">ConfessBa</string>
+    <string name="um_confession">UMConfession</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="register">Register</string>
 </resources>
