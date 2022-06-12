@@ -201,7 +201,7 @@ public class SubmitPostActivity extends AppCompatActivity {
                 getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
                 // Show progress indicator
                 mProgressIndicatorCardView.setVisibility(View.VISIBLE);
-                savePostToDatabase();
+                pushPostToWaitingList();
             } else {
                 Toast.makeText(this, "You cannot submit a post without content.", Toast.LENGTH_SHORT).show();
             }
@@ -230,6 +230,7 @@ public class SubmitPostActivity extends AppCompatActivity {
                             intent.putExtra("date", post.getDate());
                             intent.putExtra("time", post.getTime());
                             intent.putStringArrayListExtra("imagePaths", (ArrayList<String>) post.getImagePaths());
+                            intent.putStringArrayListExtra("repliedBy", (ArrayList<String>) post.getRepliedBy());
                             startActivity(intent);
                         }
                     }
@@ -249,7 +250,7 @@ public class SubmitPostActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void savePostToDatabase() {
+    private void pushPostToWaitingList() {
         // get reference to firebase storage
         FirebaseStorage firebaseStorage = FirebaseStorage.getInstance();
         StorageReference storageReference = firebaseStorage.getReference();
@@ -289,52 +290,34 @@ public class SubmitPostActivity extends AppCompatActivity {
             // set up current post id in String format
             String currPostId = String.format(Locale.US, "CFS%06d", postCountInDatabase);
 
-            // get reference to database
-            DatabaseReference postNode = databaseReference.child("submitted_posts").child(currPostId);
+            // submit the post to the waiting list
+            PostModel newPost = new PostModel();
+            newPost.setId(currPostId);
+            newPost.setReplyId(replyId);
+            newPost.setDate(date);
+            newPost.setTime(time);
+            newPost.setContent(content);
+            newPost.setImagePaths(imagePaths);
+            App.waitingList.offer(newPost);
 
-            // staging the data
-            HashMap<String, Object> postMap = new HashMap<>();
-            postMap.put("id", currPostId);
-            postMap.put("replyId", replyId);
-            postMap.put("date", date);
-            postMap.put("time", time);
-            postMap.put("content", content);
-            postMap.put("imagePaths", imagePaths);
+            // increment the post count in the database
+            HashMap<String, Object> hashMap = new HashMap<>();
+            hashMap.put("post-count", postCountInDatabase + 1);
+            databaseReference.updateChildren(hashMap).addOnCompleteListener(task13 -> {
+                // Hide progress indicator
+                mProgressIndicatorCardView.setVisibility(View.INVISIBLE);
+                // display submit successful message
+                String message = "Post " + currPostId + " submitted at " + date + "   " + time + ".\n"
+                        + "Your confession will be published soon.";
+                Toast.makeText(SubmitPostActivity.this, message, Toast.LENGTH_SHORT).show();
+                // navigate the user back to the home page
+                Intent intent = new Intent(SubmitPostActivity.this, MainActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
+                finish();
 
-            // record the current post id as the children of the original post
-            if (replyId != null) {
-                DatabaseReference repliedPostNode = databaseReference.child("submitted_posts").child(replyId);
-                repliedPostNode.get().addOnCompleteListener(dataSnapshotTask -> {
-                    PostModel repliedPost = dataSnapshotTask.getResult().getValue(PostModel.class);
-                    List<String> repliedBy = Objects.requireNonNull(repliedPost).getRepliedBy();
-                    if (repliedBy == null) {
-                        repliedBy = new ArrayList<>();
-                    }
-                    repliedBy.add(currPostId);
-                    HashMap<String, Object> hashMap = new HashMap<>();
-                    hashMap.put("repliedBy", repliedBy);
-                    repliedPostNode.updateChildren(hashMap);
-                });
-            }
-
-            // push the staged data to the database
-            postNode.updateChildren(postMap).addOnCompleteListener(voidTask -> {
-                if (voidTask.isSuccessful()) {
-                    // increment the post count in the database
-                    HashMap<String, Object> hashMap = new HashMap<>();
-                    hashMap.put("post-count", postCountInDatabase + 1);
-                    databaseReference.updateChildren(hashMap);
-                    // Hide progress indicator
-                    mProgressIndicatorCardView.setVisibility(View.INVISIBLE);
-                    // TODO: 6/11/2022 replace with notification
-                    Toast.makeText(SubmitPostActivity.this, "Post submitted successfully.", Toast.LENGTH_SHORT).show();
-                    // navigate the user back to home page
-                    Intent intent = new Intent(SubmitPostActivity.this, MainActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    startActivity(intent);
-                    finish();
-                }
             }).addOnFailureListener(e -> {
+                // display error message
                 Toast.makeText(SubmitPostActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
                 getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
             });
