@@ -62,7 +62,6 @@ public class App extends Application {
                 @Override
                 public void run() {
                     int waitingListSize = waitingList.size();
-                    System.out.println("post count: " + waitingListSize);
                     if (waitingListSize == 0) {
                         elapsedSec = 0;
                     } else if (waitingListSize > 10) {
