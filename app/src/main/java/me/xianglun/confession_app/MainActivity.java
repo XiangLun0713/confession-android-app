@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -35,6 +36,8 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView mRecyclerView;
     private PostAdapter postAdapter;
     private ArrayList<PostModel> postList;
+    private FirebaseAuth mAuth;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +47,8 @@ public class MainActivity extends AppCompatActivity {
         mToolbar = findViewById(R.id.main_toolbar);
         mFloatingActionButton = findViewById(R.id.floating_action_button);
         mRecyclerView = findViewById(R.id.post_recycler_view);
+
+        mAuth = FirebaseAuth.getInstance();
 
         loadAllPosts();
 
@@ -150,6 +155,9 @@ public class MainActivity extends AppCompatActivity {
         if (item.getItemId() == R.id.log_out_menu_item) {
             Toast.makeText(this, "Logging out", Toast.LENGTH_SHORT).show();
             // TODO: 6/4/2022 Jiajun please put the log out function here to log the user out of their account
+            mAuth.signOut();
+            finish();
+            startActivity(new Intent(MainActivity.this, LoginActivity.class));
         } else if (item.getItemId() == R.id.settings_menu_item) {
             // TODO: 6/5/2022 Navigate the user to the settings page
         }
