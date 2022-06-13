@@ -7,7 +7,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.inputmethod.EditorInfo;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -152,14 +151,9 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == R.id.log_out_menu_item) {
-            Toast.makeText(this, "Logging out", Toast.LENGTH_SHORT).show();
-            // TODO: 6/4/2022 Jiajun please put the log out function here to log the user out of their account
-            mAuth.signOut();
-            finish();
-            startActivity(new Intent(MainActivity.this, LoginActivity.class));
-        } else if (item.getItemId() == R.id.settings_menu_item) {
-            // TODO: 6/5/2022 Navigate the user to the settings page
+        if (item.getItemId() == R.id.main_admin_menu_item) {
+            Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+            startActivity(intent);
         }
         return super.onOptionsItemSelected(item);
     }

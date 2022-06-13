@@ -307,7 +307,7 @@ public class SubmitPostActivity extends AppCompatActivity {
                 // Hide progress indicator
                 mProgressIndicatorCardView.setVisibility(View.INVISIBLE);
                 // display submit successful message
-                String message = "Post " + currPostId + " submitted at " + date + "   " + time + ".\n"
+                String message = "Post " + currPostId + " submitted at\n" + date + "   " + time + ".\n"
                         + "Your confession will be published soon.";
                 Toast.makeText(SubmitPostActivity.this, message, Toast.LENGTH_SHORT).show();
                 // navigate the user back to the home page
@@ -318,7 +318,7 @@ public class SubmitPostActivity extends AppCompatActivity {
 
             }).addOnFailureListener(e -> {
                 // display error message
-                Toast.makeText(SubmitPostActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(SubmitPostActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
                 getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
             });
         }));

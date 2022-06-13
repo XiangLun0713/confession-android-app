@@ -6,6 +6,7 @@
             android:id="@+id/post_reply_menu"
             android:title="@string/reply"
             app:showAsAction="never" />
+
     <item
             android:id="@+id/post_report_menu"
             android:title="@string/report"

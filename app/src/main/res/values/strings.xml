@@ -33,4 +33,13 @@
     <string name="email">Email</string>
     <string name="password">Password</string>
     <string name="register">Register</string>
+    <string name="reported">Reported</string>
+    <string name="admin">Admin</string>
+    <string name="add_admin">add admin member</string>
+    <string name="delete_post">Delete post</string>
+    <string name="remove_from_reported">Remove from reported</string>
+    <string name="reported_post_icon">reported post icon</string>
+    <string name="admin_icon">admin icon</string>
+    <string name="dev">xianglun</string>
+    <string name="delete_admin_button">delete admin button</string>
 </resources>
