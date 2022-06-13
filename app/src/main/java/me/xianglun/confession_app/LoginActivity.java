@@ -4,20 +4,13 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Patterns;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.button.MaterialButton;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 
 public class LoginActivity extends AppCompatActivity {
@@ -26,10 +19,8 @@ public class LoginActivity extends AppCompatActivity {
     private EditText mEmailEditText;
     private EditText mPasswordEditText;
     private MaterialButton mLoginButton;
-    private MaterialButton mRegisterButton;
-    private TextView register;
-
-    private FirebaseAuth mAuth;
+    private CardView mCardView;
+    private FirebaseAuth mFirebaseAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,64 +29,47 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
 
         // Instantiate the reference variable
+        mCardView = findViewById(R.id.login_progress_card_view);
         mEmailEditText = findViewById(R.id.login_email_edit_text);
         mPasswordEditText = findViewById(R.id.login_password_edit_text);
         mLoginButton = findViewById(R.id.login_button);
-        mRegisterButton = findViewById(R.id.register_button);
+        mFirebaseAuth = FirebaseAuth.getInstance();
 
-        mAuth = FirebaseAuth.getInstance();
-
-        //check if user has created an account before
-        if(mAuth.getCurrentUser() != null){
-            startActivity(new Intent(getApplicationContext(), MainActivity.class));
+        // Check if user is already logged in
+        if (mFirebaseAuth.getCurrentUser() != null) {
+            // If yes, navigate the user directly to the admin page
+            startActivity(new Intent(getApplicationContext(), AdminMainActivity.class));
             finish();
         }
 
-        //redirect when user press register button
-        mRegisterButton.setOnClickListener(v -> {
-            Intent intent = new Intent(LoginActivity.this, SignUpActivity.class);
-            startActivity(intent);
-        });
-
         // Set on click listener on the login button
         mLoginButton.setOnClickListener(v -> {
-
+            // set progress bar visible
+            mCardView.setVisibility(View.VISIBLE);
+            // get user inputs
             String email = mEmailEditText.getText().toString().trim();
             String password = mPasswordEditText.getText().toString().trim();
 
-            if (email.isEmpty()) {
-                mEmailEditText.setError("Email is required!");
+            if (email.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                mEmailEditText.setError("Please enter a valid email address!");
                 mEmailEditText.requestFocus();
-                return;
-            }
-
-            if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                mEmailEditText.setError("Please enter a valid email!");
-                mEmailEditText.requestFocus();
-                return;
-            }
-
-            if (password.isEmpty()) {
-                mPasswordEditText.setError("Password is required!");
+            } else if (password.isEmpty()) {
+                mPasswordEditText.setError("Please enter a valid password!");
                 mPasswordEditText.requestFocus();
-                return;
+            } else {
+                mFirebaseAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        // set progress bar invisible
+                        mCardView.setVisibility(View.INVISIBLE);
+                        Toast.makeText(LoginActivity.this, "Log in successful. Welcome!", Toast.LENGTH_SHORT).show();
+                        startActivity(new Intent(LoginActivity.this, AdminMainActivity.class));
+                    } else {
+                        // set progress bar invisible
+                        mCardView.setVisibility(View.INVISIBLE);
+                        Toast.makeText(LoginActivity.this, "Invalid credential.", Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
-
-            if (password.length() < 6) {
-                mPasswordEditText.setError("Min password length is 6 characters!");
-                mPasswordEditText.requestFocus();
-                return;
-            }
-
-            mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(task -> {
-                if (task.isSuccessful()) {
-                    Toast.makeText(LoginActivity.this, "Logged in Successfully ", Toast.LENGTH_SHORT).show();
-                    startActivity(new Intent(getApplicationContext(), MainActivity.class));
-                } else {
-                    Toast.makeText(LoginActivity.this, "Error! User not found! ", Toast.LENGTH_SHORT).show();
-
-                }
-            });
         });
     }
 }

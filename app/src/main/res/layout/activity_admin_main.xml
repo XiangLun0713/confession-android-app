@@ -20,15 +20,19 @@
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize" />
 
+        <com.google.android.material.tabs.TabLayout
+                android:id="@+id/tab_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:tabIndicatorColor="@color/dark_blue"
+                app:tabSelectedTextColor="@color/dark_blue" />
+
     </com.google.android.material.appbar.AppBarLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/admin_post_recycler_view"
+    <androidx.viewpager.widget.ViewPager
+            android:id="@+id/view_pager"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:scrollbars="vertical"
-            android:orientation="vertical"
-            android:padding="4dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/admin_appbar_layout"

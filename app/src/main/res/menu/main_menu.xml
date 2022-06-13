@@ -10,13 +10,9 @@
             app:showAsAction="always|collapseActionView" />
 
     <item
-            android:id="@+id/settings_menu_item"
-            android:title="@string/settings"
-            app:showAsAction="never" />
-
-    <item
-            android:id="@+id/log_out_menu_item"
-            android:title="@string/log_out"
-            app:showAsAction="never" />
+            android:id="@+id/main_admin_menu_item"
+            android:title="@string/admin"
+            android:icon="@drawable/ic_star_icon_24"
+            app:showAsAction="ifRoom" />
 
 </menu>

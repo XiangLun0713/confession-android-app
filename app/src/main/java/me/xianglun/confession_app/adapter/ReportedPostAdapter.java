@@ -14,6 +14,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -71,14 +72,26 @@ public class ReportedPostAdapter extends RecyclerView.Adapter<ReportedPostAdapte
         holder.time.setText(post.getTime());
         holder.date.setText(post.getDate());
         holder.imageMenuButton.setOnClickListener(v -> {
-            // ask for delete post confirmation
-            AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AlertDialogTheme);
-            builder.setTitle("Delete Post");
-            builder.setMessage("Are you sure you want to delete this post? All of its replying post will also be deleted.");
-            builder.setPositiveButton("Delete", (dialog, id) -> batchRemoval(post.getId(), post.getReplyId()));
-            builder.setNegativeButton(android.R.string.cancel, (dialog, id) -> {
+            PopupMenu popupMenu = new PopupMenu(context, v);
+            popupMenu.inflate(R.menu.reported_post_menu);
+            popupMenu.getMenu().findItem(R.id.delete_post_button).setOnMenuItemClickListener(item -> {
+                // ask for delete post confirmation
+                AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AlertDialogTheme);
+                builder.setTitle("Delete Post");
+                builder.setMessage("Are you sure you want to delete this post? All of its replying post will also be deleted.");
+                builder.setPositiveButton("Delete", (dialog, id) -> batchRemoval(post.getId(), post.getReplyId()));
+                builder.setNegativeButton(android.R.string.cancel, (dialog, id) -> {
+                });
+                builder.show();
+                return true;
             });
-            builder.show();
+            popupMenu.getMenu().findItem(R.id.remove_from_reported_button).setOnMenuItemClickListener(item -> {
+                // remove the post from reported posts collection
+                FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance("https://confession-android-app-default-rtdb.asia-southeast1.firebasedatabase.app");
+                firebaseDatabase.getReference().child("reported_posts").child(post.getId()).removeValue().addOnCompleteListener(task -> Toast.makeText(context, "Post successfully removed from the reported post list.", Toast.LENGTH_SHORT).show());
+                return true;
+            });
+            popupMenu.show();
         });
 
         // load image if there is any
@@ -199,7 +212,7 @@ public class ReportedPostAdapter extends RecyclerView.Adapter<ReportedPostAdapte
             replyToText = itemView.findViewById(R.id.adapter_reported_reply_to_text);
             replyId = itemView.findViewById(R.id.adapter_reported_reply_post_id);
             content = itemView.findViewById(R.id.adapter_reported_post_text);
-            imageMenuButton = itemView.findViewById(R.id.adapter_reported_post_delete_button);
+            imageMenuButton = itemView.findViewById(R.id.adapter_reported_post_option_button);
             imageView = itemView.findViewById(R.id.adapter_reported_post_image);
 
             itemView.setOnClickListener(v -> {
