@@ -41,6 +41,8 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import org.tensorflow.lite.support.label.Category;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -50,6 +52,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
+import me.xianglun.confession_app.helper.TextClassificationClient;
 import me.xianglun.confession_app.model.PostModel;
 
 public class SubmitPostActivity extends AppCompatActivity {
@@ -69,6 +72,7 @@ public class SubmitPostActivity extends AppCompatActivity {
     private List<String> imagePaths;
     private ArrayList<String> repliedBy;
     private long postCountInDatabase;
+    private TextClassificationClient textClassificationClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,6 +94,8 @@ public class SubmitPostActivity extends AppCompatActivity {
         intent = getIntent();
         replyId = intent.getStringExtra("replyId");
         repliedBy = intent.getStringArrayListExtra("repliedBy");
+        textClassificationClient = new TextClassificationClient(getApplicationContext());
+        textClassificationClient.load();
 
         // add listener to keep track of the post count in database
         databaseReference.child("post-count").addValueEventListener(new ValueEventListener() {
@@ -196,12 +202,25 @@ public class SubmitPostActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == R.id.submit_post_menu_item) {
-            if (!contentText.getText().toString().isEmpty()) {
+            String inputContent = contentText.getText().toString();
+            if (!inputContent.isEmpty()) {
                 // Disable any clicks
                 getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
                 // Show progress indicator
                 mProgressIndicatorCardView.setVisibility(View.VISIBLE);
-                pushPostToWaitingList();
+                // check for spam (fraud/promotion)
+                List<Category> results = textClassificationClient.classify(inputContent);
+                double score = results.get(1).getScore();
+                System.out.println(score);
+                if (score > 0.8) {
+                    // Hide progress indicator
+                    mProgressIndicatorCardView.setVisibility(View.INVISIBLE);
+                    // display spam (fraud/promotion) detected message
+                    Toast.makeText(this, String.format(Locale.US, "Your message was detected as SPAM with a probability of %.3f%%!", score * 100), Toast.LENGTH_LONG).show();
+                    getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                } else {
+                    pushPostToWaitingList();
+                }
             } else {
                 Toast.makeText(this, "You cannot submit a post without content.", Toast.LENGTH_SHORT).show();
             }
@@ -317,6 +336,8 @@ public class SubmitPostActivity extends AppCompatActivity {
                 finish();
 
             }).addOnFailureListener(e -> {
+                // Hide progress indicator
+                mProgressIndicatorCardView.setVisibility(View.INVISIBLE);
                 // display error message
                 Toast.makeText(SubmitPostActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
                 getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);

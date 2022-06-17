@@ -66,7 +66,7 @@ public class App extends Application {
                         elapsedSec = 0;
                     } else if (waitingListSize > 10) {
                         // wait for 5 min (300 sec)
-                        if (elapsedSec >= 300) {
+                        if (elapsedSec >= 5) {
                             // if elapse time is 5 min or more
                             PostModel post = waitingList.poll();
                             if (post != null) {
@@ -76,7 +76,7 @@ public class App extends Application {
                         }
                     } else if (waitingListSize > 5) {
                         // wait for 10 min (600 sec)
-                        if (elapsedSec >= 600) {
+                        if (elapsedSec >= 10) {
                             // if elapse time is 10 min or more
                             PostModel post = waitingList.poll();
                             if (post != null) {
@@ -86,7 +86,7 @@ public class App extends Application {
                         }
                     } else {
                         // wait for 15 min (900 sec)
-                        if (elapsedSec >= 900) {
+                        if (elapsedSec >= 15) {
                             // if elapse time is 15 min or more
                             PostModel post = waitingList.poll();
                             if (post != null) {
