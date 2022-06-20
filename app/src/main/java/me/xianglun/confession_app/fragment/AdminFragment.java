@@ -102,6 +102,10 @@ public class AdminFragment extends Fragment {
         adminAdapter = new AdminAdapter(getContext(), adminList);
         mRecyclerView.setAdapter(adminAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        mRecyclerView.setHasFixedSize(true);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        mRecyclerView.setItemAnimator(null);
+        mRecyclerView.setItemViewCacheSize(50);
 
         FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance("https://confession-android-app-default-rtdb.asia-southeast1.firebasedatabase.app");
         DatabaseReference databaseReference = firebaseDatabase.getReference().child("Admin");

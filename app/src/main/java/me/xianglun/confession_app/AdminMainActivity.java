@@ -2,6 +2,8 @@ package me.xianglun.confession_app;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.Html;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -25,6 +27,7 @@ import java.util.List;
 import java.util.Objects;
 
 import me.xianglun.confession_app.fragment.AdminFragment;
+import me.xianglun.confession_app.fragment.DeletePostFragment;
 import me.xianglun.confession_app.fragment.ReportedPostFragment;
 
 public class AdminMainActivity extends AppCompatActivity {
@@ -37,6 +40,8 @@ public class AdminMainActivity extends AppCompatActivity {
 
     private AdminFragment adminFragment;
     private ReportedPostFragment reportedPostFragment;
+    private DeletePostFragment deletePostFragment;
+    private boolean doubleBackToExitPressedOnce;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,15 +55,18 @@ public class AdminMainActivity extends AppCompatActivity {
         mFirebaseAuth = FirebaseAuth.getInstance();
         adminFragment = new AdminFragment();
         reportedPostFragment = new ReportedPostFragment();
+        deletePostFragment = new DeletePostFragment();
 
         // setting up the tab layout and the view pager adapter
         mTabLayout.setupWithViewPager(mViewPager);
         ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager(), 0);
         viewPagerAdapter.addFragment(reportedPostFragment, "Reported");
+        viewPagerAdapter.addFragment(deletePostFragment, "Remove");
         viewPagerAdapter.addFragment(adminFragment, "Admin");
         mViewPager.setAdapter(viewPagerAdapter);
         Objects.requireNonNull(mTabLayout.getTabAt(0)).setIcon(R.drawable.ic_warning_icon_24);
-        Objects.requireNonNull(mTabLayout.getTabAt(1)).setIcon(R.drawable.ic_people_icon_24);
+        Objects.requireNonNull(mTabLayout.getTabAt(1)).setIcon(R.drawable.ic_delete_icon_24);
+        Objects.requireNonNull(mTabLayout.getTabAt(2)).setIcon(R.drawable.ic_people_icon_24);
 
         // configure the action bar
         mToolbar.setTitle(Html.fromHtml("<font color=\"#444444\">&nbsp;&nbsp Admin </font>"));
@@ -75,18 +83,35 @@ public class AdminMainActivity extends AppCompatActivity {
     }
 
     @Override
+    public void onBackPressed() {
+        if (doubleBackToExitPressedOnce) {
+            logOut();
+            return;
+        }
+
+        this.doubleBackToExitPressedOnce = true;
+        Toast.makeText(this, "Please click BACK again to log out", Toast.LENGTH_SHORT).show();
+
+        new Handler(Looper.getMainLooper()).postDelayed(() -> doubleBackToExitPressedOnce = false, 2000);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == R.id.admin_logout_menu_item) {
-            if (mFirebaseAuth.getCurrentUser() != null) {
-                mFirebaseAuth.signOut();
-                Toast.makeText(this, "Logging out", Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(AdminMainActivity.this, MainActivity.class);
-                startActivity(intent);
-                finish();
-            }
+            logOut();
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void logOut() {
+        if (mFirebaseAuth.getCurrentUser() != null) {
+            mFirebaseAuth.signOut();
+            Toast.makeText(this, "Logging out", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(AdminMainActivity.this, MainActivity.class);
+            startActivity(intent);
+            finish();
+        }
     }
 
     private static class ViewPagerAdapter extends FragmentPagerAdapter {
