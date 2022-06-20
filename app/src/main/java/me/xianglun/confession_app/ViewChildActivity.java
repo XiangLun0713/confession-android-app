@@ -58,6 +58,10 @@ public class ViewChildActivity extends AppCompatActivity {
         postAdapter = new PostAdapter(this, postList);
         mRecyclerView.setAdapter(postAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mRecyclerView.setHasFixedSize(true);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mRecyclerView.setItemAnimator(null);
+        mRecyclerView.setItemViewCacheSize(50);
         postAdapter.setOnItemClickListener(position -> {
             PostModel post = postList.get(position);
             Intent intent = new Intent(ViewChildActivity.this, SubmitPostActivity.class);

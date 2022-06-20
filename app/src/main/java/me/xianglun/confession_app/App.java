@@ -29,6 +29,8 @@ public class App extends Application {
     private NotificationManagerCompat notificationManager;
     // App level post waiting list
     public static final Queue<PostModel> waitingList = new LinkedList<>();
+    // waiting list content (for spam detection)
+    public static final Queue<String> waitingListContent = new LinkedList<>();
 
     @Override
     public void onCreate() {
@@ -69,6 +71,7 @@ public class App extends Application {
                         if (elapsedSec >= 5) {
                             // if elapse time is 5 min or more
                             PostModel post = waitingList.poll();
+                            waitingListContent.poll();
                             if (post != null) {
                                 savePostToDatabase(post);
                             }
@@ -79,6 +82,7 @@ public class App extends Application {
                         if (elapsedSec >= 10) {
                             // if elapse time is 10 min or more
                             PostModel post = waitingList.poll();
+                            waitingListContent.poll();
                             if (post != null) {
                                 savePostToDatabase(post);
                             }
@@ -89,6 +93,7 @@ public class App extends Application {
                         if (elapsedSec >= 15) {
                             // if elapse time is 15 min or more
                             PostModel post = waitingList.poll();
+                            waitingListContent.poll();
                             if (post != null) {
                                 savePostToDatabase(post);
                             }

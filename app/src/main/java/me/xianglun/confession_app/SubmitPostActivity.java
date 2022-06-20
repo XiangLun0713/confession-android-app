@@ -213,13 +213,27 @@ public class SubmitPostActivity extends AppCompatActivity {
                 double score = results.get(1).getScore();
                 System.out.println(score);
                 if (score > 0.8) {
+                    // if does not pass spam test,
                     // Hide progress indicator
                     mProgressIndicatorCardView.setVisibility(View.INVISIBLE);
                     // display spam (fraud/promotion) detected message
                     Toast.makeText(this, String.format(Locale.US, "Your message was detected as SPAM with a probability of %.3f%%!", score * 100), Toast.LENGTH_LONG).show();
                     getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
                 } else {
-                    pushPostToWaitingList();
+                    System.out.println(App.waitingListContent);
+                    // if passed spam test,
+                    // check for spam (repetitive)
+                    if (isSpam(inputContent)) {
+                        // if is spam,
+                        // Hide progress indicator
+                        mProgressIndicatorCardView.setVisibility(View.INVISIBLE);
+                        // display spam (repetitive) detected message
+                        Toast.makeText(this, "Your message was detected as SPAM! Please do not repeatedly submit similar confession content!", Toast.LENGTH_LONG).show();
+                        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                    } else {
+                        // if is not spam,
+                        pushPostToWaitingList();
+                    }
                 }
             } else {
                 Toast.makeText(this, "You cannot submit a post without content.", Toast.LENGTH_SHORT).show();
@@ -269,6 +283,15 @@ public class SubmitPostActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    private boolean isSpam(String content) {
+        for (String s : App.waitingListContent) {
+            if (s.equals(content)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void pushPostToWaitingList() {
         // get reference to firebase storage
         FirebaseStorage firebaseStorage = FirebaseStorage.getInstance();
@@ -276,6 +299,7 @@ public class SubmitPostActivity extends AppCompatActivity {
 
         // get user inputs
         String content = contentText.getText().toString();
+        App.waitingListContent.offer(content);
 
         // set up tasks list
         List<Task<UploadTask.TaskSnapshot>> storeImageOnDatabaseTaskList = new ArrayList<>();
@@ -346,7 +370,7 @@ public class SubmitPostActivity extends AppCompatActivity {
     }
 
     private void displayImagePickerDialog() {
-        ImagePicker.with(this).start();
+        ImagePicker.with(this).galleryOnly().start();
     }
 
     @Override
