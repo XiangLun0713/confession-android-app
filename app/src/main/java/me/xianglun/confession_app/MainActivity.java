@@ -35,7 +35,6 @@ public class MainActivity extends AppCompatActivity {
     private PostAdapter postAdapter;
     private ArrayList<PostModel> postList;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,9 +60,6 @@ public class MainActivity extends AppCompatActivity {
         postAdapter = new PostAdapter(this, postList);
         mRecyclerView.setAdapter(postAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        mRecyclerView.setHasFixedSize(true);
-        mRecyclerView.setItemAnimator(null);
-        mRecyclerView.setItemViewCacheSize(50);
         postAdapter.setOnItemClickListener(position -> {
             PostModel post = postList.get(position);
             Intent intent = new Intent(MainActivity.this, SubmitPostActivity.class);
@@ -134,10 +130,7 @@ public class MainActivity extends AppCompatActivity {
         }
         PostAdapter postAdapter = new PostAdapter(this, filteredList);
         mRecyclerView.setAdapter(postAdapter);
-        mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        mRecyclerView.setItemAnimator(null);
-        mRecyclerView.setItemViewCacheSize(50);
         postAdapter.setOnItemClickListener(position -> {
             PostModel post = filteredList.get(position);
             Intent intent = new Intent(MainActivity.this, SubmitPostActivity.class);

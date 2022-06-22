@@ -62,6 +62,7 @@ public class ReportedPostAdapter extends RecyclerView.Adapter<ReportedPostAdapte
     public void onBindViewHolder(@NonNull ReportedPostAdapter.ReportedViewHolder holder, int position) {
         // setting up the view holder
         PostModel post = reportedPostList.get(position);
+        holder.setIsRecyclable(false);
         holder.imageView.setImageDrawable(null);
         holder.id.setText("#".concat(post.getId()));
         holder.content.setText(post.getContent());

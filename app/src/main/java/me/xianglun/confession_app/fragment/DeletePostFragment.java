@@ -2,14 +2,14 @@ package me.xianglun.confession_app.fragment;
 
 import android.content.Context;
 import android.os.Bundle;
-
-import androidx.appcompat.app.AlertDialog;
-import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AlertDialog;
+import androidx.fragment.app.Fragment;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.firebase.database.DataSnapshot;
@@ -72,8 +72,11 @@ public class DeletePostFragment extends Fragment {
      * Batch removing the targeted post and its children using DFS
      */
     private void batchRemoval(String id) {
-        // if id entered with leading #, remove it
-        if (id.charAt(0) == '#') id = id.substring(1);
+        // if id entered with leading #, return
+        if (id.charAt(0) == '#') {
+            Toast.makeText(getContext(), "Batch remove unsuccessful. Please enter a valid ID.", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         // access database & storage reference
         FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance("https://confession-android-app-default-rtdb.asia-southeast1.firebasedatabase.app");
@@ -83,8 +86,6 @@ public class DeletePostFragment extends Fragment {
 
         // search for reply id
         final String[] replyId = {null};
-        AtomicBoolean isRemoved = new AtomicBoolean(false);
-        String finalId = id;
         postNode.child(id).get().addOnCompleteListener(task -> {
             DataSnapshot snapshot = task.getResult();
             if (snapshot.exists()) {
@@ -92,7 +93,7 @@ public class DeletePostFragment extends Fragment {
                 replyId[0] = Objects.requireNonNull(postModel).getReplyId();
             }
             // perform deletion using dfs to delete itself and all of its children
-            isRemoved.set(dfsDelete(finalId, postNode, reportedPostNode, firebaseStorage));
+            dfsDelete(id, postNode, reportedPostNode, firebaseStorage);
         });
         // remove its presence in its parent repliedBy list
         if (replyId[0] != null) {
@@ -101,22 +102,17 @@ public class DeletePostFragment extends Fragment {
                 if (snapshot.exists()) {
                     PostModel postModel = snapshot.getValue(PostModel.class);
                     List<String> newRepliedByList = Objects.requireNonNull(postModel).getRepliedBy();
-                    newRepliedByList.remove(finalId);
+                    newRepliedByList.remove(id);
                     HashMap<String, Object> hashMap = new HashMap<>();
                     hashMap.put("repliedBy", newRepliedByList);
                     postNode.child(replyId[0]).updateChildren(hashMap);
                 }
             });
         }
-        if (isRemoved.get()) {
-            Toast.makeText(getContext(), "Batch remove successfully!", Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(getContext(), "Batch remove unsuccessful. Please enter a valid ID.", Toast.LENGTH_SHORT).show();
-        }
+        Toast.makeText(getContext(), "Batch remove successfully!", Toast.LENGTH_SHORT).show();
     }
 
-    private boolean dfsDelete(String id, DatabaseReference postNode, DatabaseReference reportedPostNode, FirebaseStorage firebaseStorage) {
-        AtomicBoolean isRemoved = new AtomicBoolean(false);
+    private void dfsDelete(String id, DatabaseReference postNode, DatabaseReference reportedPostNode, FirebaseStorage firebaseStorage) {
         postNode.child(id).get().addOnCompleteListener(task -> {
             DataSnapshot snapshot = task.getResult();
             if (snapshot.exists()) {
@@ -139,10 +135,8 @@ public class DeletePostFragment extends Fragment {
                         dfsDelete(replyingId, postNode, reportedPostNode, firebaseStorage);
                     }
                 }
-                isRemoved.set(true);
             }
         });
-        return isRemoved.get();
     }
 
 }
