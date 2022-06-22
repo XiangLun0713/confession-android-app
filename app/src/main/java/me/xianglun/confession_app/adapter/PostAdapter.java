@@ -58,6 +58,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
     @Override
     public void onBindViewHolder(@NonNull PostAdapter.PostViewHolder holder, int position) {
         // setting up the view holder
+        holder.setIsRecyclable(false);
         PostModel post = postList.get(position);
         holder.imageView.setImageDrawable(null);
         holder.id.setText("#".concat(post.getId()));

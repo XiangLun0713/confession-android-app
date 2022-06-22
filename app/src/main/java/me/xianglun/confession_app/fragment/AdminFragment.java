@@ -118,7 +118,6 @@ public class AdminFragment extends Fragment {
                         adminList.add(admin);
                     }
                 }
-                System.out.println(adminList);
                 adminAdapter.notifyDataSetChanged();
             }
 

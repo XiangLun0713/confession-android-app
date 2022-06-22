@@ -86,7 +86,6 @@ public class DeletePostFragment extends Fragment {
 
         // search for reply id
         final String[] replyId = {null};
-        AtomicBoolean isRemoved = new AtomicBoolean(false);
         postNode.child(id).get().addOnCompleteListener(task -> {
             DataSnapshot snapshot = task.getResult();
             if (snapshot.exists()) {
@@ -94,7 +93,7 @@ public class DeletePostFragment extends Fragment {
                 replyId[0] = Objects.requireNonNull(postModel).getReplyId();
             }
             // perform deletion using dfs to delete itself and all of its children
-            isRemoved.set(dfsDelete(id, postNode, reportedPostNode, firebaseStorage));
+            dfsDelete(id, postNode, reportedPostNode, firebaseStorage);
         });
         // remove its presence in its parent repliedBy list
         if (replyId[0] != null) {
@@ -110,15 +109,10 @@ public class DeletePostFragment extends Fragment {
                 }
             });
         }
-        if (isRemoved.get()) {
-            Toast.makeText(getContext(), "Batch remove successfully!", Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(getContext(), "Batch remove unsuccessful. Please enter a valid ID.", Toast.LENGTH_SHORT).show();
-        }
+        Toast.makeText(getContext(), "Batch remove successfully!", Toast.LENGTH_SHORT).show();
     }
 
-    private boolean dfsDelete(String id, DatabaseReference postNode, DatabaseReference reportedPostNode, FirebaseStorage firebaseStorage) {
-        AtomicBoolean isRemoved = new AtomicBoolean(false);
+    private void dfsDelete(String id, DatabaseReference postNode, DatabaseReference reportedPostNode, FirebaseStorage firebaseStorage) {
         postNode.child(id).get().addOnCompleteListener(task -> {
             DataSnapshot snapshot = task.getResult();
             if (snapshot.exists()) {
@@ -141,10 +135,8 @@ public class DeletePostFragment extends Fragment {
                         dfsDelete(replyingId, postNode, reportedPostNode, firebaseStorage);
                     }
                 }
-                isRemoved.set(true);
             }
         });
-        return isRemoved.get();
     }
 
 }

@@ -211,7 +211,6 @@ public class SubmitPostActivity extends AppCompatActivity {
                 // check for spam (fraud/promotion)
                 List<Category> results = textClassificationClient.classify(inputContent);
                 double score = results.get(1).getScore();
-                System.out.println(score);
                 if (score > 0.8) {
                     // if does not pass spam test,
                     // Hide progress indicator
@@ -220,7 +219,6 @@ public class SubmitPostActivity extends AppCompatActivity {
                     Toast.makeText(this, String.format(Locale.US, "Your message was detected as SPAM with a probability of %.3f%%!", score * 100), Toast.LENGTH_LONG).show();
                     getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
                 } else {
-                    System.out.println(App.waitingListContent);
                     // if passed spam test,
                     // check for spam (repetitive)
                     if (isSpam(inputContent)) {

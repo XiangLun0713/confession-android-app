@@ -58,10 +58,6 @@ public class ReportedPostFragment extends Fragment {
         reportedPostAdapter = new ReportedPostAdapter(getContext(), reportedPostList);
         mRecyclerView.setAdapter(reportedPostAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        mRecyclerView.setHasFixedSize(true);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        mRecyclerView.setItemAnimator(null);
-        mRecyclerView.setItemViewCacheSize(50);
         reportedPostAdapter.setOnItemClickListener(position -> {
             PostModel post = reportedPostList.get(position);
             Intent intent = new Intent(getContext(), SubmitPostActivity.class);
