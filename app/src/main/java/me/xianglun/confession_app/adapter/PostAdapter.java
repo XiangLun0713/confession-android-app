@@ -2,25 +2,21 @@ package me.xianglun.confession_app.adapter;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.target.CustomTarget;
-import com.bumptech.glide.request.transition.Transition;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -30,7 +26,6 @@ import java.util.HashMap;
 import me.xianglun.confession_app.R;
 import me.xianglun.confession_app.SubmitPostActivity;
 import me.xianglun.confession_app.model.PostModel;
-import pereira.agnaldo.previewimgcol.ImageCollectionView;
 
 public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder> {
 
@@ -64,6 +59,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
     public void onBindViewHolder(@NonNull PostAdapter.PostViewHolder holder, int position) {
         // setting up the view holder
         PostModel post = postList.get(position);
+        holder.imageView.setImageDrawable(null);
         holder.id.setText("#".concat(post.getId()));
         holder.content.setText(post.getContent());
         holder.time.setText(post.getTime());
@@ -94,26 +90,19 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 
         // load image if there is any
         if (post.getImagePaths() != null && post.getImagePaths().size() > 0) {
-            for (String path : post.getImagePaths()) {
-                if (!path.isEmpty()) {
-                    // add image to the image view collection
-                    Glide.with(context)
-                            .asBitmap()
-                            .load(path)
-                            .into(new CustomTarget<Bitmap>() {
-                                @Override
-                                public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                                    holder.imageView.addImage(resource);
-                                }
-
-                                @Override
-                                public void onLoadCleared(@Nullable Drawable placeholder) {
-
-                                }
-                            });
-                }
+            String path = post.getImagePaths().get(0);
+            if (!path.isEmpty()) {
+                // add image to the image view collection
+                Glide.with(context)
+                        .asBitmap()
+                        .load(path)
+                        .into(holder.imageView);
             }
             holder.imageView.setVisibility(View.VISIBLE);
+
+        } else {
+            // if there is no images, remove the previous image
+            Glide.with(context).clear(holder.imageView);
         }
 
         if (post.getReplyId() == null) {
@@ -163,7 +152,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         private final TextView replyId;
         private final TextView content;
         private final ImageButton imageMenuButton;
-        private final ImageCollectionView imageView;
+        private final ImageView imageView;
 
         public PostViewHolder(@NonNull View itemView, OnItemClickListener listener) {
             super(itemView);

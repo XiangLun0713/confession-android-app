@@ -63,16 +63,13 @@
                 android:contentDescription="@string/post_menu"
                 app:tint="@color/grey" />
 
-        <pereira.agnaldo.previewimgcol.ImageCollectionView
+        <ImageView
                 android:id="@+id/adapter_post_image"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/adapter_post_date"
-                app:imageMargin="1dp"
-                app:pinchToZoom="true"
-                app:showExternalBorderMargins="true"
-                app:maxImagePerRow="3"
-                app:maxRows="2"
+                android:maxHeight="300dp"
+                android:adjustViewBounds="true"
                 android:scaleType="centerCrop"
                 android:visibility="invisible"
                 android:contentDescription="@string/post_image" />

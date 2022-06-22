@@ -59,7 +59,6 @@ public class ViewChildActivity extends AppCompatActivity {
         mRecyclerView.setAdapter(postAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mRecyclerView.setHasFixedSize(true);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mRecyclerView.setItemAnimator(null);
         mRecyclerView.setItemViewCacheSize(50);
         postAdapter.setOnItemClickListener(position -> {

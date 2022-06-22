@@ -42,6 +42,6 @@
     <string name="admin_icon">admin icon</string>
     <string name="dev">xianglun</string>
     <string name="delete_admin_button">delete admin button</string>
-    <string name="post_id">Post Id</string>
+    <string name="post_id">Post Id (Ex. CFS000000)</string>
     <string name="logo">logo</string>
 </resources>

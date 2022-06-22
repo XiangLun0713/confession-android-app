@@ -352,7 +352,7 @@ public class SubmitPostActivity extends AppCompatActivity {
                 // display submit successful message
                 String message = "Post " + currPostId + " submitted at\n" + date + "   " + time + ".\n"
                         + "Your confession will be published soon.";
-                Toast.makeText(SubmitPostActivity.this, message, Toast.LENGTH_SHORT).show();
+                Toast.makeText(SubmitPostActivity.this, message, Toast.LENGTH_LONG).show();
                 // navigate the user back to the home page
                 Intent intent = new Intent(SubmitPostActivity.this, MainActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
