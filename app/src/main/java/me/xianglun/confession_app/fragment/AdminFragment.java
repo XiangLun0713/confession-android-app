@@ -103,7 +103,6 @@ public class AdminFragment extends Fragment {
         mRecyclerView.setAdapter(adminAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         mRecyclerView.setHasFixedSize(true);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         mRecyclerView.setItemAnimator(null);
         mRecyclerView.setItemViewCacheSize(50);
 

@@ -16,7 +16,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -35,7 +34,6 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView mRecyclerView;
     private PostAdapter postAdapter;
     private ArrayList<PostModel> postList;
-    private FirebaseAuth mAuth;
 
 
     @Override
@@ -46,8 +44,6 @@ public class MainActivity extends AppCompatActivity {
         mToolbar = findViewById(R.id.main_toolbar);
         mFloatingActionButton = findViewById(R.id.floating_action_button);
         mRecyclerView = findViewById(R.id.post_recycler_view);
-
-        mAuth = FirebaseAuth.getInstance();
 
         loadAllPosts();
 
@@ -66,7 +62,6 @@ public class MainActivity extends AppCompatActivity {
         mRecyclerView.setAdapter(postAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mRecyclerView.setHasFixedSize(true);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mRecyclerView.setItemAnimator(null);
         mRecyclerView.setItemViewCacheSize(50);
         postAdapter.setOnItemClickListener(position -> {
