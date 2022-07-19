@@ -1,5 +1,5 @@
 # Confess-Ba
-Assignment for Data Structure (WIA1002)
+Confess-Ba is an android application that provides a platform for people from all walks of life to confess about the problems that they faced with others.
 
 ## Group Member:
 - Choo Xiang Lun  (S2132552/1)
