@@ -7,6 +7,10 @@ Assignment for Data Structure (WIA1002)
 - Jason Wong Jack (U2102864/1)
 - Lim Jiajun      (S2124035/1)
 
+## Reports:
+- [Managerial Report](https://github.com/XiangLun0713/confession-android-app/blob/master/WIA1002%20DS%20CCJL%20Managerial%20report.pdf)
+- [Technical Report](https://github.com/XiangLun0713/confession-android-app/blob/master/WIA1002%20DS%20CCJL%20Technical%20Report.pdf)
+
 ## Extra Features:
 1. <b>Notification System.</b> User will be notify when their confession has been published
 2. <b>Spam detection for fraudulent or promotions content.</b> We incorporated a text classification SPAM machine learning model into our application. This model is able to accurately classify fraudulent or promotional content, thus preventing posts with this content to be published on our platform.
